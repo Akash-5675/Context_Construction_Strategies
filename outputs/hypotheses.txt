@@ -1,0 +1,103 @@
+NOTE: ['proposition'] not present in results — excluded from all analyses.
+
+======================================================================
+H1 — Overlap adds no benefit (fixed-token conditions)
+======================================================================
+
+By overlap level:
+                n  answer_rate  rouge_all  rouge_answered
+overlap_pct                                              
+0.0          2400       0.3767     0.1058          0.2006
+10.0         2400       0.3633     0.1029          0.2015
+20.0         2400       0.3713     0.1015          0.2003
+40.0         2400       0.3862     0.1008          0.2056
+
+Two-way ANOVA (chunk size + overlap):
+                    sum_sq      df          F   PR(>F)
+C(chunk_size)     2.296558     2.0  57.721628  0.00000
+C(overlap_pct)    0.035050     3.0   0.587294  0.62328
+Residual        190.857173  9594.0        NaN      NaN
+
+Tukey HSD across overlap levels:
+Multiple Comparison of Means - Tukey HSD, FWER=0.05
+===================================================
+group1 group2 meandiff p-adj   lower  upper  reject
+---------------------------------------------------
+     0     10  -0.0029 0.8917 -0.0134 0.0076  False
+     0     20  -0.0043 0.7195 -0.0148 0.0062  False
+     0     40   -0.005 0.6171 -0.0155 0.0055  False
+    10     20  -0.0014 0.9868 -0.0119 0.0091  False
+    10     40  -0.0021 0.9587 -0.0126 0.0085  False
+    20     40  -0.0007 0.9984 -0.0112 0.0098  False
+---------------------------------------------------
+
+0% overlap mean = 0.1058   40% overlap mean = 0.1008
+Welch t-test 0% vs 40%: t = 1.211, p = 0.226043
+
+H1 VERDICT: SUPPORTED — overlap has no significant effect on rouge_l (p = 0.6233) once chunk size is controlled
+
+======================================================================
+H2 — Sentence chunking matches semantic chunking
+======================================================================
+
+By strategy:
+                 n  answer_rate  rouge_all  ctx_words  rouge_answered
+condition                                                            
+semantic       800       0.3738     0.0787  1256.0363          0.1807
+sent_nltk      800       0.3662     0.0813  1163.3725          0.1871
+sent_scispacy  800       0.3800     0.0837  1163.8525          0.1843
+
+One-way ANOVA across strategies: F = 0.3808, p = 0.683341
+
+Tukey HSD:
+     Multiple Comparison of Means - Tukey HSD, FWER=0.05     
+=============================================================
+  group1      group2    meandiff p-adj   lower  upper  reject
+-------------------------------------------------------------
+ semantic     sent_nltk   0.0026 0.8915 -0.0108  0.016  False
+ semantic sent_scispacy    0.005 0.6578 -0.0084 0.0184  False
+sent_nltk sent_scispacy   0.0024 0.9091  -0.011 0.0158  False
+-------------------------------------------------------------
+
+ANCOVA (strategy, controlling for context_words):
+                  sum_sq      df          F    PR(>F)
+C(condition)    0.004912     2.0   0.189354  0.827506
+context_words   0.216982     1.0  16.728854  0.000045
+Residual       31.077408  2396.0        NaN       NaN
+Strategy effect controlling for context size: p = 0.827506
+
+H2 VERDICT: SUPPORTED — no significant difference between sentence and semantic chunking (p = 0.6833)
+
+======================================================================
+H3 — Context cliff (quality falls as context grows)
+======================================================================
+
+By approximate context tokens:
+            n  answer_rate  rouge_all  rouge_answered
+bin                                                  
+<500      833       0.2977     0.1614          0.2534
+500-1k   3166       0.3358     0.1192          0.2140
+1k-1.5k  2797       0.3504     0.0879          0.2081
+1.5k-2k  1883       0.4302     0.0894          0.1875
+2k-2.5k  1555       0.4161     0.0781          0.1794
+2.5k-3k  1141       0.4382     0.0801          0.1756
+>3k       625       0.3872     0.0672          0.1695
+
+Pearson correlation (context tokens vs rouge_l): r = -0.1497, p = 4.46582e-61
+Same, answered rows only: r = -0.1344, p = 1.53592e-19
+
+Largest drop between adjacent bins: at 500-1k (change -0.0422)
+
+H3 VERDICT: SUPPORTED — rouge_l declines significantly as context grows (r = -0.150, p = 4.47e-61)
+
+======================================================================
+Secondary — MiniLM (general) vs PubMedBERT (biomedical)
+======================================================================
+
+                    n  answer_rate  rouge_all  recall  rouge_answered
+embedding_model                                                      
+minilm           6000       0.4010     0.1007  0.2933          0.1942
+pubmedbert       6000       0.3473     0.0962  0.2253          0.2033
+
+Welch t-test: t = 1.806, p = 0.0709768
+MiniLM scores higher (not significantly different at alpha=0.05).

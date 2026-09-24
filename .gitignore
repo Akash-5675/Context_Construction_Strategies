@@ -1,0 +1,30 @@
+# Secrets
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node (thesis builder dependencies — reinstall with `npm install`)
+node_modules/
+
+# Large generated artefacts — reproducible from source
+indexes/
+data/chunks/
+data/pubmed_corpus.csv
+
+# Full run log (5 MB) — summary tables are committed instead
+outputs/all_results.csv
+
+# Scratch
+outputs/unpacked/
+*.tmp
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
